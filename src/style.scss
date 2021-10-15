@@ -1,0 +1,83 @@
+table {
+  width: 100%;
+  border: 1px solid #666;
+  border-collapse: collapse;
+
+  > {
+    thead > tr > th,
+    tbody > tr > td {
+      padding: 0.25rem 0.5rem;
+      border: 1px solid #666;
+    }
+  }
+}
+
+.tool-bar {
+  &__show,
+  &__search {
+    label {
+      min-width: 70px;
+      line-height: 50px;
+    }
+    select {
+      min-width: 80px;
+    }
+  }
+}
+
+.pagination > {
+  li > {
+    a {
+      background-color: white;
+      color: black;
+
+      &:focus,
+      &:hover {
+        color: black;
+        background-color: #eee;
+        border-color: #ddd;
+      }
+    }
+
+    span {
+      &:focus,
+      &:hover {
+        color: black;
+        background-color: #eee;
+        border-color: #ddd;
+      }
+    }
+  }
+
+  .active > a {
+    color: white;
+    background-color: black !important;
+    border: solid 1px black !important;
+
+    &:hover {
+      background-color: black !important;
+      border: solid 1px black;
+    }
+  }
+}
+
+label.error {
+  position: absolute;
+  left: 0%;
+  top: 100%;
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: #dc3545;
+}
+
+.tw-15 {
+  width: 15%;
+}
+
+.tw-25 {
+  width: 25%;
+}
+
+.tw-30 {
+  width: 30%;
+}
