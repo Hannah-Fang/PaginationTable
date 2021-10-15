@@ -408,48 +408,93 @@ $("#addBtn").click(function(e){
  * @param {num} currentRowsShown 選擇中的顯示筆數
  */
 let rowsShown;
+let currPage;
 function getPagination (feedbackData = [], currentRowsShown) {
   rowsShown = (currentRowsShown)? currentRowsShown: 5;
 
   let numPages = Math.ceil(feedbackData.length/rowsShown);
 
-  console.log(rowsShown);
-
   for(i=0; i<numPages; i++){
     let pageNum = i+1;
-    $("#pagination").append('<li class="page-item" id="pageItem" rel='+ pageNum +'><a class="page-link" href="#">'+ pageNum +'</a></li>')
+    $("li#next").before('<li class="page-item" id="pageItem" rel='+ i +'><a class="page-link" href="#">'+ pageNum +'</a></li>')
   }
-
   $('#data tr').hide(); //隱藏所有資料
   $('#data tr').slice(0, rowsShown).show(); //顯示指定內容數量的資料
 
   $('#pagination #pageItem:first').addClass('active');
 
-  // 點擊分頁標籤，變動顯示的資料內容，透過CSS隱藏
+  // 依照目前的分頁和顯示筆數，算出哪些資料要顯示，多餘的透過CSS隱藏
+  let currPage = 0;
+  let startItem = currPage * rowsShown;
+  let endItem = startItem + rowsShown;
+
+  $("li#prev").addClass('disabled');
+  $("li#start").addClass('disabled');
+  
+  $('#data tr').css('opacity','0.0').hide().slice(startItem, endItem).css('display','table-row').animate({opacity:1}, 300);
+  
+  // 點擊分頁標籤，變動顯示的資料內容
   $('#pagination li').on('click', function(){
     
-    let currPage = $(this).attr('rel');
-    let startItem = currPage * rowsShown;
-    let endItem = startItem + rowsShown;
-    $('#data tr').css('opacity','0.0').hide().slice(startItem, endItem).css('display','table-row').animate({opacity:1}, 300);
-  });
+    if($(this).attr("id") === "pageItem"){
+      $('#pagination li').removeClass('active');
+      $(this).addClass('active');
+      currPage = parseInt($(this).attr('rel'));
+      
+    } else if ($(this).attr("id") ==="prev"){
+      $('#pagination li').removeClass('active');
+      $('#pagination li#pageItem').eq(currPage - 1).addClass('active');
+      currPage -= 1;
+    } else if ($(this).attr("id") ==="next"){
+      $('#pagination li').removeClass('active');
+      $('#pagination li#pageItem').eq(currPage + 1).addClass('active');
+      currPage += 1;
+    } else if ($(this).attr("id") ==="start"){
+      $('#pagination li').removeClass('active');
+      $('#pagination li#pageItem').first().addClass('active');
+      currPage = 0;
+    } else if ($(this).attr("id") ==="end"){
+      $('#pagination li').removeClass('active');
+      $('#pagination li#pageItem').last().addClass('active');
+      currPage = numPages - 1;
+    }
 
-  // $("#prev").on('click', function(){
-    //    $('#pagination')
-    //    .find('li.active')
-    //    .prev()
-    //    .addClass('active');
-    //  });
-  }
-  
-  $("#maxRows").on('change',function (e) {
-    currentRowsShown = parseInt($(this).val());
-  
-    $('#pagination')
-    .find('li')
-    .slice(2)
-    .remove();
-  
-    getPagination(_data, currentRowsShown);
+    currPageNum = parseInt(currPage);
+    maxPageNum = currPage + 1;
+    
+    if (currPageNum === 0){
+      $("li#prev").addClass('disabled');
+      $("li#start").addClass('disabled');
+      $("li#next").removeClass('disabled');
+      $("li#end").removeClass('disabled');
+    } else if (currPageNum > 0 && maxPageNum < numPages) {
+      $("li#prev").removeClass('disabled');
+      $("li#start").removeClass('disabled');
+      $("li#next").removeClass('disabled');
+      $("li#end").removeClass('disabled');
+    } else if (maxPageNum >= numPages) {
+      $("li#next").addClass('disabled');
+      $("li#end").addClass('disabled');
+    }
+
+    startItem = currPage * rowsShown;
+    endItem = startItem + rowsShown;
+    
+    $('#data tr').css('opacity','0.0').hide().slice(startItem, endItem).css('display','table-row').animate({opacity:1}, 300);
+
   });
+    
+};
+
+  
 // 顯示筆數變動時，取得變動的數字，並變動分頁標籤&顯示資料
+$("#maxRows").on('change',function (e) {
+  currentRowsShown = parseInt($(this).val());
+
+  $('#pagination')
+  .find('li')
+  .slice(2,-2)
+  .remove();
+
+  getPagination(_data, currentRowsShown);
+});

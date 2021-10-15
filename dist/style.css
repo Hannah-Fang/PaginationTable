@@ -67,4 +67,58 @@ label.error {
 .tw-30 {
   width: 30%;
 }
+
+.disabled {
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+@media only screen and (max-width: 992px) {
+  table,
+  thead,
+  tbody,
+  th,
+  td,
+  tr {
+    display: block;
+  }
+  .table > :not(:first-child) {
+    border-top: 2px solid transparent !important;
+  }
+  thead tr {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+  }
+  tbody tr {
+    border: 2px solid #aaa !important;
+  }
+  td {
+    border: 1px solid transparent !important;
+    position: relative;
+    padding-left: 50% !important;
+    text-align: left !important;
+  }
+  td:before {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    width: 45%;
+    padding-right: 10px;
+    white-space: nowrap;
+    font-weight: bold;
+  }
+  td:nth-of-type(1):before {
+    content: "English Name";
+  }
+  td:nth-of-type(2):before {
+    content: "Email";
+  }
+  td:nth-of-type(3):before {
+    content: "Phone";
+  }
+  td:nth-of-type(4):before {
+    content: "Date";
+  }
+}
 /*# sourceMappingURL=style.css.map */
