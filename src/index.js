@@ -427,6 +427,8 @@ function getPagination (feedbackData = [], currentRowsShown) {
 
   // 點擊分頁標籤，變動顯示的資料內容，透過CSS隱藏
   $('#pagination li').on('click', function(){
+    
+    let currPage = $(this).attr('rel');
     let startItem = currPage * rowsShown;
     let endItem = startItem + rowsShown;
     $('#data tr').css('opacity','0.0').hide().slice(startItem, endItem).css('display','table-row').animate({opacity:1}, 300);
