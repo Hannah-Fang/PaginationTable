@@ -106,8 +106,10 @@ label.error {
     left: -9999px;
   }
 
-  tbody tr {
-    border: 2px solid #aaa !important;
+  tr {
+    border: 1px solid #aaa !important;
+    display: list-item !important;
+    list-style-type: none;
   }
 
   td {
