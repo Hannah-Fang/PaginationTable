@@ -413,28 +413,20 @@ function getPagination (feedbackData = [], currentRowsShown) {
 
   let numPages = Math.ceil(feedbackData.length/rowsShown);
 
+  console.log(rowsShown);
+
   for(i=0; i<numPages; i++){
     let pageNum = i+1;
     $("#pagination").append('<li class="page-item" id="pageItem" rel='+ pageNum +'><a class="page-link" href="#">'+ pageNum +'</a></li>')
   }
+
   $('#data tr').hide(); //隱藏所有資料
   $('#data tr').slice(0, rowsShown).show(); //顯示指定內容數量的資料
 
   $('#pagination #pageItem:first').addClass('active');
 
   // 點擊分頁標籤，變動顯示的資料內容，透過CSS隱藏
-  let lastPage = 1;
   $('#pagination li').on('click', function(){
-    lastPage = 1;
-    let currPage;
-
-    if($(this).attr("id") === "pageItem"){
-      $('#pagination li').removeClass('active');
-      $(this).addClass('active');
-      currPage = $(this).attr('rel');
-      lastPage = currPage;
-    } 
-
     let startItem = currPage * rowsShown;
     let endItem = startItem + rowsShown;
     $('#data tr').css('opacity','0.0').hide().slice(startItem, endItem).css('display','table-row').animate({opacity:1}, 300);
