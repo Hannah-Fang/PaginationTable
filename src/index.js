@@ -226,7 +226,7 @@ class Table {
   addData(e){
     let phoneValiate = /09\d{2}-\d{6}/;
     let emailValiate = /^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/;
-    let validate = $("form#addform").validate({
+    $("form#addform").validate({
       rules:{
         enname: {
           required: true,
@@ -260,16 +260,12 @@ class Table {
 
       submitHandler: function (form) {
         const formElement = document.getElementById("addform");
-        let enname = formElement[0].value;
-        let email = formElement[1].value;
-        let phone = formElement[2].value;
-        let date = document.getElementById("date").innerHTML;
         let newData = {
           id: _data.length + 1,
-          name: enname,
-          email: email,
-          phone: phone,
-          date: date
+          name: formElement[0].value,
+          email: formElement[1].value,
+          phone: formElement[2].value,
+          date: document.getElementById("date").innerHTML,
         }
         _data.push(newData);
         $("#addform")[0].reset();
