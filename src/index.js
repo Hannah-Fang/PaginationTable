@@ -188,8 +188,8 @@ class Table {
     this.currentRowsShown = currentRowsShown;
     this.value = value;
   }
-  refetchTable(result, newRes) {
-    this.feedbackData = (result)? result : newRes;
+  refetchTable(result) {
+    this.feedbackData = (result)? result : [];
 
     let $element = $("#userTable>tbody");
     $element.empty();
@@ -219,7 +219,7 @@ class Table {
   getDate() {
     let date = new Date();
     const formatDate = () => {
-      return formatted_date = date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + (date.getDate()+1);
+      return date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + (date.getDate()+1);
     }
     document.getElementById("date").innerHTML = formatDate(date);
   }
@@ -304,7 +304,7 @@ class Table {
 
     if(numPages === 1) {
       $("li#next").addClass('disabled');
-        $("li#end").addClass('disabled');
+      $("li#end").addClass('disabled');
     }
     $('#pagination #pageItem:first').addClass('active');
 
@@ -322,30 +322,36 @@ class Table {
     $('#pagination li').on('click', function(){
       
       // 分頁標籤狀態改變
-      if($(this).attr("id") === "pageItem"){
-        $('#pagination li').removeClass('active');
-        $(this).addClass('active');
-        currPage = parseInt($(this).attr('rel'));
-      } else if ($(this).attr("id") ==="prev"){
-        $('#pagination li').removeClass('active');
-        $('#pagination li#pageItem').eq(currPage - 1).addClass('active');
-        currPage -= 1;
-      } else if ($(this).attr("id") ==="next"){
-        $('#pagination li').removeClass('active');
-        $('#pagination li#pageItem').eq(currPage + 1).addClass('active');
-        currPage += 1;
-      } else if ($(this).attr("id") ==="start"){
-        $('#pagination li').removeClass('active');
-        $('#pagination li#pageItem').first().addClass('active');
-        currPage = 0;
-      } else if ($(this).attr("id") ==="end"){
-        $('#pagination li').removeClass('active');
-        $('#pagination li#pageItem').last().addClass('active');
-        currPage = numPages - 1;
+      switch($(this).attr("id")){
+        case "pageItem":
+          $('#pagination li').removeClass('active');
+          $(this).addClass('active');
+          currPage = +($(this).attr('rel'));
+          break;
+        case "prev":
+          $('#pagination li').removeClass('active');
+          $('#pagination li#pageItem').eq(currPage - 1).addClass('active');
+          currPage -= 1;
+          break;
+        case "next":
+          $('#pagination li').removeClass('active');
+          $('#pagination li#pageItem').eq(currPage + 1).addClass('active');
+          currPage += 1;
+          break;
+        case "start":
+          $('#pagination li').removeClass('active');
+          $('#pagination li#pageItem').first().addClass('active');
+          currPage = 0;
+          break;
+        case "end":
+          $('#pagination li').removeClass('active');
+          $('#pagination li#pageItem').last().addClass('active');
+          currPage = numPages - 1;
+          break;
       }
   
       // 特殊分頁標籤狀態改變
-      let currPageNum = parseInt(currPage);
+      let currPageNum = +currPage;
       let maxPageNum = currPage + 1;
       
       if (currPageNum === 0){
@@ -377,7 +383,7 @@ class Table {
     const regexpResult = new RegExp($.trim(value), "ig");
 
     // 遍歷陣列中的object
-    for (let i = 0; i < _data.length; i++) {
+    for (let i = 0, len = _data.length; i < len; i++) {
       for (let key in _data[i]) {
         // 組合一個新字串
         const scanValue = Object.keys(_data[i]).reduce((res, key) => {
@@ -396,9 +402,8 @@ class Table {
       !_set.has(JSON.stringify(item)) ? _set.add(JSON.stringify(item)) : false
     );
 
-    const newRes = !result ? [] : result;
     table.refetchTable(result);
-    return newRes;
+    return !result ? [] : result;
   }
   filterKeywords(value, _data){
     // 字串不限制大小寫與去除空白
@@ -464,7 +469,6 @@ $("#searchTxt").on("keyup", function () {
   }, 500);
 });
 
-
 // Table-Madal-點擊新增按鈕時就抓取日期資料
 $("#add-btn").click(function(){
   table.getDate();
@@ -479,7 +483,7 @@ $("#addBtn").click(function(e){
   
 // Pagination-顯示筆數變動時，取得變動的數字，並變動分頁標籤&顯示資料
 $("#maxRows").on('change',function (e) {
-  currentRowsShown = parseInt($(this).val());
+  currentRowsShown = +($(this).val());
 
   $('#pagination')
   .find('li')
