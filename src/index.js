@@ -161,333 +161,323 @@ var _data = [
     phone: ['0931-283902'],
     date: '2021-03-19',
   },
-  // {
-  //   id: 24,
-  //   name: 'Sandra Eric Thomas',
-  //   email: 'k.svhwbemp@mjnmh.ma',
-  //   phone: ['0999-821075'],
-  //   date: '2021-03-20',
-  // },
-  // {
-  //   id: 25,
-  //   name: 'Deborah Daniel Walker',
-  //   email: 'p.giszzjsg@ixqfmlnxo.cy',
-  //   phone: ['0930-744958'],
-  //   date: '2021-03-03',
-  // },
+  {
+    id: 24,
+    name: 'Sandra Eric Thomas',
+    email: 'k.svhwbemp@mjnmh.ma',
+    phone: ['0999-821075'],
+    date: '2021-03-20',
+  },
+  {
+    id: 25,
+    name: 'Deborah Daniel Walker',
+    email: 'p.giszzjsg@ixqfmlnxo.cy',
+    phone: ['0930-744958'],
+    date: '2021-03-03',
+  },
 ];
 
-/**
- * 1. 關鍵字搜尋(Slow)
- * (1) for迴圈比對每個物件value
- * (2) 將每個物件轉為字串
- * (3) 利用ES6 set(集合)方法篩選唯一值
- *
- * @param {string} value
- * @param {object[]} _array
- * @return {object[]} 回傳符合搜尋結果的物件陣列
- */
-function searchKeywords(value, _array = []) {
-  const matchsArray = [];
-  // 字串不限制大小寫與去除空白
-  const regexpResult = new RegExp($.trim(value), "ig");
-
-  // 遍歷陣列中的object
-  for (let i = 0; i < _array.length; i++) {
-    for (key in _array[i]) {
-      // 組合一個新字串
-      const scanValue = Object.keys(_array[i]).reduce((res, key) => {
-        // 排除id欄位篩選
-        return key !== "id" ? res + _array[i][key] : res;
-      }, "");
-
-      // 比對正則條件字串
-      if (scanValue.match(regexpResult)) matchsArray.push(_array[i]);
-    }
-  }
-
-  /* === 集合方法篩選唯一值 === */
-  const _set = new Set();
-  const result = matchsArray.filter((item) =>
-    !_set.has(JSON.stringify(item)) ? _set.add(JSON.stringify(item)) : false
-  );
-
-  // const result = [
-  //   ...new Set(matchsArray.map((item) => JSON.stringify(item)))
-  // ].map((item) => JSON.parse(item));
-
-  const newRes = !result ? [] : result;
-  refetchTable(newRes);
-  return newRes;
-}
-
-/**
- * 2. 關鍵字搜尋(Quick)
- * @param {string} value
- * @param {object[]} _array
- * @return {object[]} 回傳符合搜尋結果的物件陣列
- */
-function filterKeywords(value, _array = []) {
-  // 字串不限制大小寫與去除空白
-  const regexpResult = new RegExp($.trim(value), "ig");
-  // 篩選物件陣列
-  const result = _array.filter((obj) => {
-    // 組合一個新字串
-    const scanValue = Object.keys(obj).reduce((res, key) => {
-      // 排除id欄位
-      return key !== "id" ? res + obj[key] : res;
-    }, "");
-
-    // 比對正則條件字串
-    return scanValue.match(regexpResult);
-  });
-
-  refetchTable(result);
-  return result;
-}
-
-/**
- * 3. 關鍵字搜尋(Lodash)
- * @param {string} value
- * @param {object[]} _array
- * @return {object[]} 回傳符合搜尋結果的物件陣列
- */
-function lodashFilterKeywords(value, _array = []) {
-  // 篩選物件陣列
-  const result = _.filter(_array, function (obj) {
-    // 組合一個新字串
-    const scanValue = Object.keys(obj).reduce((res, key) => {
-      // 排除id欄位
-      return key !== "id" ? res + obj[key] : res;
-    }, "");
-
-    // 比對符合的字串, 不限制大小寫與去除空白
-    return _.includes(
-      _.lowerCase(_.trim(scanValue)),
-      _.lowerCase(_.trim(value))
-    );
-  });
-
-  refetchTable(result);
-  return result;
-}
 
 /**
  * 重新渲染 Table
  * @param {Array} feedbackData 欄位資料
  */
-function refetchTable(feedbackData = []) {
-  let $element = $("#userTable>tbody");
-  $element.empty();
+class Table {
+  constructor(_data, currentRowsShown, value){
+    this.feedbackData = _data;
+    this.currentRowsShown = currentRowsShown;
+    this.value = value;
+  }
+  refetchTable(result, newRes) {
+    this.feedbackData = (result)? result : newRes;
 
-  if (feedbackData && feedbackData.length) {
-    // 顯示所有資料
-    $.each(feedbackData, function (key, item) {
-      let row = $("<tr></tr>");
+    let $element = $("#userTable>tbody");
+    $element.empty();
+  
+    if (this.feedbackData && this.feedbackData.length) {
+      // 顯示所有資料
+      $.each(this.feedbackData, function (key, item) {
+        let row = $("<tr></tr>");
+        
+        row.append($('<td></td>').html(item.name));
+        row.append($('<td></td>').html(item.email));
+        row.append($('<td></td>').html(item.phone));
+        row.append($('<td></td>').html(item.date));
+        
+        $element.append(row);
+      });
       
-      row.append($('<td></td>').html(item.name));
-      row.append($('<td></td>').html(item.email));
-      row.append($('<td></td>').html(item.phone));
-      row.append($('<td></td>').html(item.date));
-      
-      $element.append(row);
+      // 顯示總筆數
+      document.getElementById("total").innerHTML = "共 " + this.feedbackData.length + " 筆資料";
+  
+    } else {
+      $element
+        .empty()
+        .html($("<tr></tr>").append('<td colspan="4">No Data.</td>'));
+    }
+  }
+  getDate() {
+    let date = new Date();
+    const formatDate = () => {
+      return formatted_date = date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + (date.getDate()+1);
+    }
+    document.getElementById("date").innerHTML = formatDate(date);
+  }
+  addData(e){
+    let phoneValiate = /09\d{2}-\d{6}/;
+    let emailValiate = /^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/;
+    let validate = $("form#addform").validate({
+      rules:{
+        enname: {
+          required: true,
+        },
+        email: {
+          required: true,
+          email: true,
+          pattern: emailValiate,
+        },
+        phone: {
+          required: true,
+          minlength: 10,
+          pattern: phoneValiate,
+        },
+      },
+      messages: {
+        enname: {
+          required: "此欄位為必填",
+        },
+        email: {
+          required: "此欄位為必填",
+          email: "Email格式錯誤",
+          pattern: "Email格式錯誤",
+        },
+        phone: {
+          required: "手機號碼格式錯誤",
+          minlength: "手機格式錯誤",
+          pattern: "手機格式錯誤",
+        },
+      },
+
+      submitHandler: function (form) {
+        const formElement = document.getElementById("addform");
+        let enname = formElement[0].value;
+        let email = formElement[1].value;
+        let phone = formElement[2].value;
+        let date = document.getElementById("date").innerHTML;
+        let newData = {
+          id: _data.length + 1,
+          name: enname,
+          email: email,
+          phone: phone,
+          date: date
+        }
+        _data.push(newData);
+        $("#addform")[0].reset();
+
+        $("#closeAddFormModal").click();
+        e.preventDefault();
+        table.refetchTable(_data);
+
+        $('#pagination')
+          .find('li')
+          .slice(2,-2)
+          .remove();
+
+        table.getPagination(_data);
+      },
     });
-    
-    // 顯示總筆數
-    document.getElementById("total").innerHTML = "共 " + feedbackData.length + " 筆資料";
+  }
+  getPagination(_data, currentRowsShown){
+    let rowsShown = currentRowsShown? currentRowsShown : 5;
+  
+    let numPages = Math.ceil(this.feedbackData.length/rowsShown);
+  
+    // 顯示分頁按鈕
+    for(let i=0; i<numPages; i++){
+      let pageNum = i+1;
+      $("li#next").before('<li class="page-item" id="pageItem" rel='+ i +'><a class="page-link" href="#">'+ pageNum +'</a></li>')
+    }
 
-  } else {
-    $element
-      .empty()
-      .html($("<tr></tr>").append('<td colspan="4">No Data.</td>'));
+    // 設定特殊分頁按鈕的顯示狀態
+    $("li#prev").addClass('disabled');
+    $("li#start").addClass('disabled');
+
+    if(numPages === 1) {
+      $("li#next").addClass('disabled');
+        $("li#end").addClass('disabled');
+    }
+    $('#pagination #pageItem:first').addClass('active');
+
+    $('#data tr').hide(); //隱藏所有資料
+    $('#data tr').slice(0, rowsShown).show(); //顯示指定內容數量的資料
+  
+    // 依照目前的分頁和顯示筆數，算出哪些資料要顯示，多餘的透過CSS隱藏
+    let currPage = 0;
+    let startItem = currPage * rowsShown;
+    let endItem = startItem + rowsShown;
+  
+    $('#data tr').hide().removeClass('rowShow').slice(startItem, endItem).show().addClass('rowShow').animate({opacity:1}, 300);
+    
+    // 點擊分頁標籤
+    $('#pagination li').on('click', function(){
+      
+      // 分頁標籤狀態改變
+      if($(this).attr("id") === "pageItem"){
+        $('#pagination li').removeClass('active');
+        $(this).addClass('active');
+        currPage = parseInt($(this).attr('rel'));
+      } else if ($(this).attr("id") ==="prev"){
+        $('#pagination li').removeClass('active');
+        $('#pagination li#pageItem').eq(currPage - 1).addClass('active');
+        currPage -= 1;
+      } else if ($(this).attr("id") ==="next"){
+        $('#pagination li').removeClass('active');
+        $('#pagination li#pageItem').eq(currPage + 1).addClass('active');
+        currPage += 1;
+      } else if ($(this).attr("id") ==="start"){
+        $('#pagination li').removeClass('active');
+        $('#pagination li#pageItem').first().addClass('active');
+        currPage = 0;
+      } else if ($(this).attr("id") ==="end"){
+        $('#pagination li').removeClass('active');
+        $('#pagination li#pageItem').last().addClass('active');
+        currPage = numPages - 1;
+      }
+  
+      // 特殊分頁標籤狀態改變
+      let currPageNum = parseInt(currPage);
+      let maxPageNum = currPage + 1;
+      
+      if (currPageNum === 0){
+        $("li#prev").addClass('disabled');
+        $("li#start").addClass('disabled');
+        $("li#next").removeClass('disabled');
+        $("li#end").removeClass('disabled');
+      } else if (currPageNum > 0 && maxPageNum < numPages) {
+        $("li#prev").removeClass('disabled');
+        $("li#start").removeClass('disabled');
+        $("li#next").removeClass('disabled');
+        $("li#end").removeClass('disabled');
+      } else if (maxPageNum >= numPages) {
+        $("li#next").addClass('disabled');
+        $("li#end").addClass('disabled');
+      }
+
+      // 變動顯示的資料內容
+      startItem = currPage * rowsShown;
+      endItem = startItem + rowsShown;
+      
+      $('#data tr').hide().removeClass('rowShow').slice(startItem, endItem).show().addClass('rowShow').animate({opacity:1}, 300);
+  
+    });
+  }
+  searchKeywords(value, _data){
+    const matchsArray = [];
+    // 字串不限制大小寫與去除空白
+    const regexpResult = new RegExp($.trim(value), "ig");
+
+    // 遍歷陣列中的object
+    for (let i = 0; i < _data.length; i++) {
+      for (let key in _data[i]) {
+        // 組合一個新字串
+        const scanValue = Object.keys(_data[i]).reduce((res, key) => {
+          // 排除id欄位篩選
+          return key !== "id" ? res + _data[i][key] : res;
+        }, "");
+
+        // 比對正則條件字串
+        if (scanValue.match(regexpResult)) matchsArray.push(_data[i]);
+      }
+    }
+
+    /* === 集合方法篩選唯一值 === */
+    const _set = new Set();
+    const result = matchsArray.filter((item) =>
+      !_set.has(JSON.stringify(item)) ? _set.add(JSON.stringify(item)) : false
+    );
+
+    const newRes = !result ? [] : result;
+    table.refetchTable(result);
+    return newRes;
+  }
+  filterKeywords(value, _data){
+    // 字串不限制大小寫與去除空白
+    const regexpResult = new RegExp($.trim(value), "ig");
+    // 篩選物件陣列
+    const result = _data.filter((obj) => {
+      // 組合一個新字串
+      const scanValue = Object.keys(obj).reduce((res, key) => {
+        // 排除id欄位
+        return key !== "id" ? res + obj[key] : res;
+      }, "");
+
+      // 比對正則條件字串
+      return scanValue.match(regexpResult);
+    });
+
+    table.refetchTable(result);
+    return result;
+  }
+  lodashFilterKeywords(value, _data){
+    // 篩選物件陣列
+    const result = _.filter(_data, function (obj) {
+      // 組合一個新字串
+      const scanValue = Object.keys(obj).reduce((res, key) => {
+        // 排除id欄位
+        return key !== "id" ? res + obj[key] : res;
+      }, "");
+
+      // 比對符合的字串, 不限制大小寫與去除空白
+      return _.includes(
+        _.lowerCase(_.trim(scanValue)),
+        _.lowerCase(_.trim(value))
+      );
+    });
+
+    table.refetchTable(result);
+    
+    return result;
+  }
+  showSearchResult(value, _data){
+    table.searchKeywords(value, _data);
   }
 }
 
-// ====== Used ======
-  /**
-   * 顯示搜尋結果
-   * @param {string} value
-   * @param {object[]} arr
-   */
-  const showSearchResult = (value, arr = []) => {
-    searchKeywords(value, arr);
-  };
 
-  $("#searchTxt").on("keyup", function () {
-    const _value = $(this).val();
 
-    // 事件延遲0.5秒執行, 減少reflow
-    setTimeout(() => {
-      showSearchResult(_value, _data);
-    }, 500);
+// 物件實體化
+let table = new Table(_data,5);
+
+
+// 頁面首次渲染的呼叫
+table.refetchTable(_data);
+table.getPagination(_data);
+
+
+// Search-搜尋功能
+$("#searchTxt").on("keyup", function () {
+  const _value = $(this).val();
+
+  // 事件延遲0.5秒執行, 減少reflow
+  setTimeout(() => {
+    table.showSearchResult(_value, _data);
+  }, 500);
 });
 
 
+// Table-Madal-點擊新增按鈕時就抓取日期資料
+$("#add-btn").click(function(){
+  table.getDate();
+});
 
-// 點擊 #add-btn 打開Modal，欄位 Date：顯示當天加一天的日期
-$( '#add-btn' ).on( 'click', function ( e ) {
-  // e.preventDefault()
-
-  let date = new Date();
-  const formatDate = ()=>{
-    formatted_date = date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + (date.getDate()+1)
-    return formatted_date;
-  }
-
-  document.getElementById("date").innerHTML = formatDate(date);
-  
-} );
-
-
-// addfrom 新增表單
+// Table-Madal-addfrom 新增表單
 $("#addBtn").click(function(e){
   // 表單驗證
-  let phoneValiate = /09\d{2}-\d{6}/;
-  let emailValiate = /^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/;
-  let validate = $("form#addform").validate({
-    rules:{
-      enname: {
-        required: true,
-      },
-      email: {
-        required: true,
-        email: true,
-        pattern: emailValiate,
-      },
-      phone: {
-        required: true,
-        minlength: 10,
-        pattern: phoneValiate,
-      },
-    },
-    messages: {
-      enname: {
-        required: "此欄位為必填",
-      },
-      email: {
-        required: "此欄位為必填",
-        email: "Email格式錯誤",
-        pattern: "Email格式錯誤",
-      },
-      phone: {
-        required: "手機號碼格式錯誤",
-        minlength: "手機格式錯誤",
-        pattern: "手機格式錯誤",
-      },
-    },
-
-    submitHandler: function (form) {
-      const formElement = document.getElementById("addform");
-      let enname = formElement[0].value;
-      let email = formElement[1].value;
-      let phone = formElement[2].value;
-      let date = document.getElementById("date").innerHTML;
-      let newData = {
-        id: _data.length + 1,
-        name: enname,
-        email: email,
-        phone: phone,
-        date: date
-      }
-      _data.push(newData);
-      $("#addform")[0].reset();
-
-      $("#closeAddFormModal").click();
-      e.preventDefault();
-      refetchTable(_data);
-    },
-  });
-  
+  table.addData(e);
 });
 
-
-// 分頁
-/**
- * 分頁標籤 Pagination
- * @param {Array} feedbackData 欄位資料
- * @param {num} currentRowsShown 選擇中的顯示筆數
- */
-let rowsShown;
-let currPage;
-function getPagination (feedbackData = [], currentRowsShown) {
-  rowsShown = (currentRowsShown)? currentRowsShown: 5;
-
-  let numPages = Math.ceil(feedbackData.length/rowsShown);
-
-  for(i=0; i<numPages; i++){
-    let pageNum = i+1;
-    $("li#next").before('<li class="page-item" id="pageItem" rel='+ i +'><a class="page-link" href="#">'+ pageNum +'</a></li>')
-  }
-  $('#data tr').hide(); //隱藏所有資料
-  $('#data tr').slice(0, rowsShown).show(); //顯示指定內容數量的資料
-
-  $('#pagination #pageItem:first').addClass('active');
-
-  // 依照目前的分頁和顯示筆數，算出哪些資料要顯示，多餘的透過CSS隱藏
-  let currPage = 0;
-  let startItem = currPage * rowsShown;
-  let endItem = startItem + rowsShown;
-
-  $("li#prev").addClass('disabled');
-  $("li#start").addClass('disabled');
   
-  $('#data tr').css('opacity','0.0').hide().slice(startItem, endItem).css('display','table-row').animate({opacity:1}, 300);
-  
-  // 點擊分頁標籤，變動顯示的資料內容
-  $('#pagination li').on('click', function(){
-    
-    if($(this).attr("id") === "pageItem"){
-      $('#pagination li').removeClass('active');
-      $(this).addClass('active');
-      currPage = parseInt($(this).attr('rel'));
-      
-    } else if ($(this).attr("id") ==="prev"){
-      $('#pagination li').removeClass('active');
-      $('#pagination li#pageItem').eq(currPage - 1).addClass('active');
-      currPage -= 1;
-    } else if ($(this).attr("id") ==="next"){
-      $('#pagination li').removeClass('active');
-      $('#pagination li#pageItem').eq(currPage + 1).addClass('active');
-      currPage += 1;
-    } else if ($(this).attr("id") ==="start"){
-      $('#pagination li').removeClass('active');
-      $('#pagination li#pageItem').first().addClass('active');
-      currPage = 0;
-    } else if ($(this).attr("id") ==="end"){
-      $('#pagination li').removeClass('active');
-      $('#pagination li#pageItem').last().addClass('active');
-      currPage = numPages - 1;
-    }
-
-    currPageNum = parseInt(currPage);
-    maxPageNum = currPage + 1;
-    
-    if (currPageNum === 0){
-      $("li#prev").addClass('disabled');
-      $("li#start").addClass('disabled');
-      $("li#next").removeClass('disabled');
-      $("li#end").removeClass('disabled');
-    } else if (currPageNum > 0 && maxPageNum < numPages) {
-      $("li#prev").removeClass('disabled');
-      $("li#start").removeClass('disabled');
-      $("li#next").removeClass('disabled');
-      $("li#end").removeClass('disabled');
-    } else if (maxPageNum >= numPages) {
-      $("li#next").addClass('disabled');
-      $("li#end").addClass('disabled');
-    }
-
-    startItem = currPage * rowsShown;
-    endItem = startItem + rowsShown;
-    
-    $('#data tr').css('opacity','0.0').hide().slice(startItem, endItem).css('display','table-row').animate({opacity:1}, 300);
-
-  });
-    
-};
-
-  
-// 顯示筆數變動時，取得變動的數字，並變動分頁標籤&顯示資料
+// Pagination-顯示筆數變動時，取得變動的數字，並變動分頁標籤&顯示資料
 $("#maxRows").on('change',function (e) {
   currentRowsShown = parseInt($(this).val());
 
@@ -496,5 +486,5 @@ $("#maxRows").on('change',function (e) {
   .slice(2,-2)
   .remove();
 
-  getPagination(_data, currentRowsShown);
+  table.getPagination(_data, currentRowsShown);
 });
